@@ -3,8 +3,11 @@ import { client } from '@/sanity/lib/client';
 import { writeClient } from '@/sanity/lib/write-client';
 import { STARTUP_VIEWS_QUERY } from '@/sanity/lib/queries';
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
-  const { id } = params;
+export async function POST(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }  // ✅ await params
+) {
+  const { id } = await context.params;  // ✅ fix
 
   if (!id) {
     return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });

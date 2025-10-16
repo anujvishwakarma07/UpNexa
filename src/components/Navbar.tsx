@@ -4,7 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 
 export default async function Navbar() {
-  const session = await auth()
+  const session = await auth();
 
   return (
     <header className="px-4 py-3 shadow-sm bg-white">

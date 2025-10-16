@@ -1,4 +1,3 @@
-
 import NextAuth from "next-auth"
 import GitHub from "next-auth/providers/github"
 import { client } from "./sanity/lib/client"
@@ -9,34 +8,49 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [GitHub],
   callbacks: {
     async signIn({ user: { name, email, image }, profile: { id, login, bio } }) {
-      const existingUser = await client.fetch(AUTHOR_BY_GITHUB_ID_QUERY, { id: id });
+      // ✅ Check if user exists in Sanity
+      const existingUser = await client
+        .withConfig({ useCdn: false })
+        .fetch(AUTHOR_BY_GITHUB_ID_QUERY, { id })
 
       if (!existingUser) {
+        // ✅ Create new user in Sanity
         await writeClient.create({
           _type: "author",
-          id,
+          githubId: id,
           name,
           username: login,
           email,
           image,
           bio: bio || "",
-        });
+        })
       }
-      return true;
+
+      return true
     },
 
     async jwt({ token, account, profile }) {
+      // ✅ Runs on first login
       if (account && profile) {
-        const user = await client.fetch(AUTHOR_BY_GITHUB_ID_QUERY, { id: profile?.id });
+        const user = await client
+          .withConfig({ useCdn: false })
+          .fetch(AUTHOR_BY_GITHUB_ID_QUERY, { id: profile.id })
 
-        token.id = user?._id;
+        // ✅ Attach IDs to token
+        token.githubId = profile.id
+        token.id = user?._id || profile.id
       }
-      return token;
-    }
-    async session ({session, token}) {
-      Object.assign(session, {id: token.id}) ;
-      return session;
-    }
 
-  }
+      return token
+    },
+
+    async session({ session, token }) {
+      if (session.user) {
+        // ✅ Make sure ID always exists
+        session.user.id = token.id || token.githubId || null
+        session.user.githubId = token.githubId || null
+      }
+      return session
+    },
+  },
 })

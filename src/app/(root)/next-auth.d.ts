@@ -1,7 +1,8 @@
 declare module "next-auth" {
-    interface session {
-        id: string
+    interface Session {
+        id : string
     }
+
     interface JWT {
         id: string
     }

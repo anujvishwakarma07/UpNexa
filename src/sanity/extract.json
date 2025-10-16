@@ -93,7 +93,7 @@
         },
         "optional": true
       },
-      "catageory": {
+      "category": {
         "type": "objectAttribute",
         "value": {
           "type": "string"
