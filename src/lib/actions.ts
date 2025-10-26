@@ -16,6 +16,7 @@ export const createPitch = async (
   pitch: string
 ): Promise<ActionState> => {
   const session = await auth();
+
   if (!session) {
     return parseServerActionResponse({
       status: "ERROR",
@@ -23,15 +24,28 @@ export const createPitch = async (
     });
   }
 
-  // Most NextAuth setups expose the user id as session.user.id
-  const userId =
-    // @ts-ignore – depend on your auth shape
-    session?.user?.id || (session as any)?.id;
+  // Get githubId from session
+  const githubId =
+    session?.user?.githubId || (session as any)?.user?.githubId || (session as any)?.githubId;
 
-  if (!userId) {
+  if (!githubId) {
     return parseServerActionResponse({
       status: "ERROR",
-      error: "User id missing in session",
+      error: "Missing githubId in session.",
+    });
+  }
+
+  // Lookup author document by githubId
+  const authorDoc = await writeClient.fetch(
+    '*[_type == "author" && githubId == $githubId][0]',
+    { githubId }
+  );
+  const authorId = authorDoc?._id;
+
+  if (!authorId) {
+    return parseServerActionResponse({
+      status: "ERROR",
+      error: "Could not find author profile for this user.",
     });
   }
 
@@ -53,7 +67,10 @@ export const createPitch = async (
       _type: "slug",
       current: slug,
     },
-    authorId: userId, // <-- changed line
+    author: {
+      _type: "reference",
+      _ref: authorId,
+    },
     pitch: safePitch,
   };
 
