@@ -12,61 +12,91 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { createPitch } from "@/lib/actions";
 
-const StartupForm = () => {
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [pitch, setPitch] = useState("");
+type ActionState =
+  | { status: "INITIAL"; error?: string; _id?: string }
+  | { status: "SUCCESS"; _id: string; error?: string }
+  | { status: "ERROR"; error: string; _id?: string };
+
+type FieldErrors = Partial<{
+  title: string;
+  description: string;
+  category: string;
+  link: string;
+  pitch: string;
+}>;
+
+const initialState: ActionState = { status: "INITIAL" };
+
+export default function StartupForm() {
+  const [errors, setErrors] = useState<FieldErrors>({});
+  const [pitch, setPitch] = useState<string>("");
   const router = useRouter();
 
-  const handleFormSubmit = async (prevState: any, formData: FormData) => {
+  const handleFormSubmit = async (
+    prevState: ActionState,
+    formData: FormData
+  ): Promise<ActionState> => {
     try {
       const formValues = {
-        title: formData.get("title") as string,
-        description: formData.get("description") as string,
-        category: formData.get("category") as string,
-        link: formData.get("link") as string,
-        pitch,
+        title: (formData.get("title") as string) ?? "",
+        description: (formData.get("description") as string) ?? "",
+        category: (formData.get("category") as string) ?? "",
+        link: (formData.get("link") as string) ?? "",
+        pitch: pitch ?? "",
       };
 
-      // ✅ Zod validation
+      // Validate with Zod
       await formSchema.parseAsync(formValues);
 
-      // ✅ Send data to server
-      const result = await createPitch(prevState, formData, pitch);
+      // Call your server action
+      const result = await createPitch(prevState, formData, pitch ?? "");
 
-      if (result.status == "SUCCESS") {
-        toast({
-          title: "Success",
+      // Normalize result into a minimal action state to avoid accidental rendering of big objects
+      const id =
+        result?._id ??
+        (result as any)?.id ??
+        (result as any)?.insertedId ??
+        (result as any)?.data?._id ??
+        (result as any)?.data?.id;
+
+      if (result?.status === "SUCCESS" && id) {
+        toast.success("Success", {
           description: "Your startup pitch has been created successfully",
         });
-
-        router.push(`/startup/${result._id}`);
+        router.push(`/startup/${String(id)}`);
+        return { status: "SUCCESS", _id: String(id) };
       }
 
-      return result;
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const fieldErrors = error.flatten().fieldErrors;
-        setErrors(fieldErrors as unknown as Record<string, string>);
-
+      const message =
+        (typeof result?.error === "string" && result.error) ||
+        "Something went wrong while creating your pitch";
+      toast.error(message);
+      return { status: "ERROR", error: message };
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        const fe = err.flatten().fieldErrors;
+        setErrors({
+          title: fe.title?.join(", "),
+          description: fe.description?.join(", "),
+          category: fe.category?.join(", "),
+          link: fe.link?.join(", "),
+          pitch: fe.pitch?.join(", "),
+        });
         toast.error("Please check your inputs and try again");
-
-        return { ...prevState, error: "Validation failed", status: "ERROR" };
+        return { status: "ERROR", error: "Validation failed" };
       }
 
+      console.error("Submit failed:", err);
       toast.error("An unexpected error has occurred");
-
-      return {
-        ...prevState,
-        error: "An unexpected error has occurred",
-        status: "ERROR",
-      };
+      return { status: "ERROR", error: "Unexpected error" };
     }
   };
 
-  const [state, formAction, isPending] = useActionState(handleFormSubmit, {
-    error: "",
-    status: "INITIAL",
-  });
+  // React 19's useActionState returns [state, action, isPending]
+    const [state, formAction, isPending] = useActionState<ActionState>(
+      handleFormSubmit as unknown as (state: ActionState) => ActionState | Promise<ActionState>,
+      initialState
+    );
 
   return (
     <form action={formAction} className="startup-form">
@@ -142,7 +172,7 @@ const StartupForm = () => {
 
         <MDEditor
           value={pitch}
-          onChange={(value) => setPitch(value as string)}
+          onChange={(value) => setPitch(value ?? "")}
           id="pitch"
           preview="edit"
           height={300}
@@ -170,6 +200,16 @@ const StartupForm = () => {
       </Button>
     </form>
   );
-};
+}
 
-export default StartupForm;
+/*
+Note:
+- If your app uses React 18 (Next 14), replace useActionState with useFormState/useFormStatus from "react-dom".
+  Example:
+    import { useFormState, useFormStatus } from "react-dom";
+    const [state, formAction] = useFormState(handleFormSubmit, initialState);
+    function SubmitButton() {
+      const { pending } = useFormStatus();
+      return <Button disabled={pending}>...</Button>;
+    }
+*/

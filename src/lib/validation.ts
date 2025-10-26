@@ -22,9 +22,9 @@
 import { z } from "zod";
 
 export const formSchema = z.object({
-  title: z.string().min(3).max(100),
-  description: z.string().min(20).max(500),
-  category: z.string().min(3).max(20),
-  link: z.string().url(), // Accept any valid URL
-  pitch: z.string().min(10),
+  title: z.string().min(3, "Title must be at least 3 characters").max(100),
+  description: z.string().min(20, " Description must be at least 20 characters").max(500),
+  category: z.string().min(3, "Category must be at least 3 characters").max(20),
+  link: z.string().url("Please enter a valid URL"), // Accept any valid URL
+  pitch: z.string().min(10," Pitch must be at least 10 characters"),
 });
