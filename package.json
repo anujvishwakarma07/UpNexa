@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "build": "next build --no-turbo",
     "start": "next start",
     "lint": "eslint",
     "predev": "npm run typegen",
@@ -18,6 +18,7 @@
     "@sanity/image-url": "^1.2.0",
     "@sanity/vision": "^4.10.2",
     "@sentry/nextjs": "^10.19.0",
+    "@uiw/react-markdown-preview": "^5.1.5",
     "@uiw/react-md-editor": "^4.0.8",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
