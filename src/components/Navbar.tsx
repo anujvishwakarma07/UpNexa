@@ -1,7 +1,10 @@
 // src/app/components/Navbar.tsx
 import { auth, signIn, signOut } from "@/auth"
+
+import { BadgePlus, LogOut } from "lucide-react";
 import Image from "next/image"
 import Link from "next/link"
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
 export default async function Navbar() {
   const session = await auth();
@@ -16,7 +19,10 @@ export default async function Navbar() {
         <div className="flex items-center gap-5 text-black">
           {session && session.user ? (
             <>
-              <Link href="/startup/create">Create</Link>
+              <Link href="/startup/create" className="flex items-center gap-2">
+                <span className="max-sm:hidden">Create</span>
+                <BadgePlus className="w-5 h-5 text-black" />
+              </Link>
 
               <form
                 action={async () => {
@@ -24,11 +30,20 @@ export default async function Navbar() {
                   await signOut({ redirectTo: "/" })
                 }}
               >
-                <button type="submit">Logout</button>
+                <button type="submit" className="flex items-center gap-2 text-red-500">
+                  <span className="max-sm:hidden">Logout</span>
+                  <LogOut className="w-5 h-5" />
+                </button>
               </form>
 
               <Link href={`/user/${session.user.id}`}>
-                {session.user.name}
+                <Avatar className="size-10">
+                  <AvatarImage 
+                  src={session?.user?.image || ""} 
+                  alt={session?.user?.name || ""} 
+                />
+                  <AvatarFallback>AV</AvatarFallback>
+                </Avatar>
               </Link>
             </>
           ) : (

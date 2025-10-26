@@ -11,12 +11,12 @@ export default async function Home({ searchParams }: {
   searchParams?: { query?: string }
 }) {
   const query = (await searchParams)?.query;
-  const params = { search : query || null};
+  const params = { search: query || null };
 
   const session = await auth();
   console.log(session?.id);
 
-  const { data : posts} = await sanityFetch({query: STARTUPS_QUERY, params});
+  const { data: posts } = await sanityFetch({ query: STARTUPS_QUERY, params });
 
   // console.log(JSON.stringify(posts, null, 2));
 
@@ -33,6 +33,9 @@ export default async function Home({ searchParams }: {
   return (
     <>
       <section className="pink_container pattern">
+        <p className="tag tag-tri">
+          Discover and Share Innovative Startup Ideas
+        </p>
         <h1 className="heading pattern">Pitch your starup, <br />and connect with enterprenurs  </h1>
 
         <p className="sub-heading !max-w-3xl"> Submit Ideas, Vote on Pitches, and Get Noticed in Virtual Competitions</p>
@@ -48,14 +51,14 @@ export default async function Home({ searchParams }: {
         <ul className="mt-7 card_grid">
           {posts?.length > 0 ? (
             posts.map((post: StartupTypeCard) => (
-              <StartupCard key={post?._id} post={post}  />
+              <StartupCard key={post?._id} post={post} />
             ))
           ) : (
             <p className="no-results">No startup found</p>
           )}
         </ul>
       </section>
-      <SanityLive /> 
+      <SanityLive />
     </>
   );
 }

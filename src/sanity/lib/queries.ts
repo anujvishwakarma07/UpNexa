@@ -1,4 +1,4 @@
-import { defineQuery } from "next-sanity";
+import { defineQuery, groq } from "next-sanity";
 
 // Search / list query
 export const STARTUPS_QUERY = `*[_type == "startup" && (
@@ -80,3 +80,27 @@ export const STARTUPS_BY_AUTHOR_QUERY =
   category,
   image,
 }`);
+
+export const PLAYLIST_BY_SLUG_QUERY = groq`
+  *[_type == "playlist" && slug.current == $slug][0] {
+    _id,
+    title,
+    slug,
+    "select": select[]-> {
+      _id,
+      _createdAt,
+      author-> {
+        _id, 
+        name,
+        username,
+        image
+      },
+      views,
+      title,
+      description,
+      category,
+      image,
+      pitch
+    }
+  }
+`;
