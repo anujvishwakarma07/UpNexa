@@ -34,7 +34,7 @@ export default async function Home({ searchParams }: {
     <>
       <section className="pink_container pattern">
         <p className="tag tag-tri">
-          Discover and Share Innovative Startup Ideas
+          Pitch • Vote • Grow
         </p>
         <h1 className="heading pattern">Pitch your starup, <br />and connect with enterprenurs  </h1>
 
