@@ -13,7 +13,7 @@ export default async function Navbar() {
     <header className="px-4 py-3 shadow-sm bg-white">
       <nav className="flex justify-between items-center ">
         <Link href="/">
-          <Image src="/upnexa.png" alt="Logo" width={144} height={40} />
+          <Image src="/logo.png" alt="Logo" width={144} height={40} />
         </Link>
 
         <div className="flex items-center gap-5 text-black">

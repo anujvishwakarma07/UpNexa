@@ -4,9 +4,6 @@ import { auth } from "@/auth";
 import { parseServerActionResponse } from "@/lib/utils";
 import slugify from "slugify";
 import { writeClient } from "@/sanity/lib/write-client";
-// Optionally add server-side validation:
-// import { formSchema } from "@/lib/validation";
-// import { z } from "zod";
 
 type ActionState =
   | { status: "INITIAL"; error?: string; _id?: string }
@@ -44,22 +41,6 @@ export const createPitch = async (
   const link = String(form.get("link") || "");
   const safePitch = String(pitch || "");
 
-  // Optional: server-side validation mirror (recommended)
-  // try {
-  //   await formSchema.parseAsync({
-  //     title,
-  //     description,
-  //     category,
-  //     link,
-  //     pitch: safePitch,
-  //   });
-  // } catch (e) {
-  //   return parseServerActionResponse({
-  //     status: "ERROR",
-  //     error: "Validation failed",
-  //   });
-  // }
-
   const slug = slugify(title, { lower: true, strict: true });
 
   const doc = {
@@ -69,19 +50,15 @@ export const createPitch = async (
     category,
     image: link,
     slug: {
-      _type: "slug", // FIXED: must be "slug"
+      _type: "slug",
       current: slug,
     },
-    author: {
-      _type: "reference",
-      _ref: userId, // FIXED: use session.user.id
-    },
+    authorId: userId, // <-- changed line
     pitch: safePitch,
   };
 
   try {
     const created = await writeClient.create(doc);
-    // Return minimal shape only to avoid React rendering issues
     return parseServerActionResponse({
       status: "SUCCESS",
       _id: String(created._id),
