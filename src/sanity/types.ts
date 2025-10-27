@@ -125,7 +125,7 @@ export type Author = {
   _createdAt: string;
   _updatedAt: string;
   _rev: string;
-  id?: number;
+  githubId?: string;
   name?: string;
   username?: string;
   email?: string;
@@ -329,7 +329,7 @@ export type STARTUP_VIEWS_QUERYResult = {
 // Query: *[_type == "author" && id == $id][0]{    _id,    id,    name,    username,    email,    image,    bio}
 export type AUTHOR_BY_GITHUB_ID_QUERYResult = {
   _id: string;
-  id: number | null;
+  id: null;
   name: string | null;
   username: string | null;
   email: string | null;
@@ -340,7 +340,7 @@ export type AUTHOR_BY_GITHUB_ID_QUERYResult = {
 // Query: *[_type == "author" && _id == $id][0]{    _id,    id,    name,    username,    email,    image,    bio}
 export type AUTHOR_BY_ID_QUERYResult = {
   _id: string;
-  id: number | null;
+  id: null;
   name: string | null;
   username: string | null;
   email: string | null;
