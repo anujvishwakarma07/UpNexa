@@ -15,7 +15,7 @@ const md = markdownit();
 export const experimental_ppr = true;
 
 const page = async ({ params }: { params: Promise<{ id: string }> }) => {
-  const id = (await params).id;
+  const {id} = await params;
 
  
   const [post, editorPlaylist] = await Promise.all([

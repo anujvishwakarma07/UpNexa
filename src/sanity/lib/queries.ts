@@ -1,8 +1,28 @@
 import { defineQuery, groq } from "next-sanity";
 
 // Search / list query
+// export const STARTUPS_QUERY = `*[_type == "startup" && (
+//   !defined($search) || title match $search || description match $search
+// )] | order(_createdAt desc) {
+//   _id,
+//   _type,
+//   _rev,
+//   _createdAt,
+//   _updatedAt,
+//   title,
+//   slug,
+//   author->{_id, name, image, bio},
+//   views,
+//   description,
+//   category,
+//   image
+// }`;
 export const STARTUPS_QUERY = `*[_type == "startup" && (
-  !defined($search) || title match $search || description match $search
+  !defined($search) || $search == "" ||
+  title match $search || 
+  description match $search ||
+  author->name match $search || 
+  category match $search
 )] | order(_createdAt desc) {
   _id,
   _type,
@@ -17,6 +37,9 @@ export const STARTUPS_QUERY = `*[_type == "startup" && (
   category,
   image
 }`;
+
+
+
 
 
 
